@@ -34,15 +34,15 @@ func (m *BaseModel) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func Create(tag string, m interface{}) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Create(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Create(m).Error)
 }
 
-func CreateFromMap(tag string, m interface{}, mMap map[string]interface{}) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Model(m).Create(mMap).Error)
+func CreateFromMap(tag string, m interface{}, keyValues map[string]interface{}) *L.InformationConstruct {
+	return L.ParseDBError(ConnectionMap[tag].Model(m).Create(keyValues).Error)
 }
 
 func KeyValueGet(tag string, m interface{}, key, value string) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Where(key+" = ?", value).First(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Where(key+" = ?", value).First(m).Error)
 }
 
 func MultiKeyValueGet(tag string, m interface{}, key, value []string) *L.InformationConstruct {
@@ -52,19 +52,19 @@ func MultiKeyValueGet(tag string, m interface{}, key, value []string) *L.Informa
 			q.Where(key[i]+" = ?", value[ii])
 		}
 	}
-	return L.ParsePGError(q.First(m).Error)
+	return L.ParseDBError(q.First(m).Error)
 }
 
 func KeyValueGetList(tag string, m interface{}, key, value string, limit, offset int) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Where(key+" = ?", value).Limit(limit).Offset(offset).Find(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Where(key+" = ?", value).Limit(limit).Offset(offset).Find(m).Error)
 }
 
 func KeyValueSelectGetList(tag string, m interface{}, selKey, key, value string, limit, offset int) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Select(selKey).Where(key+" = ?", value).Limit(limit).Offset(offset).Find(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Select(selKey).Where(key+" = ?", value).Limit(limit).Offset(offset).Find(m).Error)
 }
 
 func GetList(tag string, m interface{}, limit, offset int) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Limit(limit).Offset(offset).Find(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Limit(limit).Offset(offset).Find(m).Error)
 }
 
 func KeyValueGetWithRelations(tag string, m interface{}, key, value string, relations []string, autoload bool) *L.InformationConstruct {
@@ -72,19 +72,19 @@ func KeyValueGetWithRelations(tag string, m interface{}, key, value string, rela
 	for _, relation := range relations {
 		dbcon = dbcon.Preload(relation)
 	}
-	return L.ParsePGError(dbcon.First(m, key+" = ?", value).Error)
+	return L.ParseDBError(dbcon.First(m, key+" = ?", value).Error)
 }
 
 func KeyValueUpdate(tag string, m interface{}, key, value string) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Model(m).Where(key+" = ?", value).Updates(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Model(m).Where(key+" = ?", value).Updates(m).Error)
 }
 
 func KeyValueUpdateOrCreate(tag string, m interface{}, key, value string) *L.InformationConstruct {
 	query := ConnectionMap[tag].Model(m).Where(key+" = ?", value).Updates(m)
 	if query.Error != nil {
-		return L.ParsePGError(query.Error)
+		return L.ParseDBError(query.Error)
 	} else if query.RowsAffected == 0 {
-		return L.ParsePGError(ConnectionMap[tag].Create(m).Error)
+		return L.ParseDBError(ConnectionMap[tag].Create(m).Error)
 	}
 
 	return nil
@@ -92,31 +92,31 @@ func KeyValueUpdateOrCreate(tag string, m interface{}, key, value string) *L.Inf
 }
 
 func KeyValueDelete(tag string, m interface{}, key, value string) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Where(key+" = ?", value).Delete(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Where(key+" = ?", value).Delete(m).Error)
 }
 
 func KeyValueHardDelete(tag string, m interface{}, key, value string) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Unscoped().Where(key+" = ?", value).Delete(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Unscoped().Where(key+" = ?", value).Delete(m).Error)
 }
 
 func Increment(tag string, m interface{}, key string) error {
-	return L.ParsePGError(ConnectionMap[tag].Model(m).Set(key, " = "+key+" + 1").Updates(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Model(m).Set(key, " = "+key+" + 1").Updates(m).Error)
 }
 
 func KeyValueUpdateColumn(tag string, m interface{}, filterKey, value, key string, newValue interface{}) error {
-	return L.ParsePGError(ConnectionMap[tag].Model(m).Where(filterKey+" = ?", value).Update(key, newValue).Error)
+	return L.ParseDBError(ConnectionMap[tag].Model(m).Where(filterKey+" = ?", value).Update(key, newValue).Error)
 }
 
 func KeyValueWhereInSelect(tag string, m interface{}, key, value, selKey, inKey string, inList interface{}) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Select(selKey).Where(key+" = ?", value).Where(inKey+" IN (?)", inList).Find(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Select(selKey).Where(key+" = ?", value).Where(inKey+" IN (?)", inList).Find(m).Error)
 }
 
 func KeyValueWhereIn(tag string, m interface{}, key, value, inKey string, inList interface{}) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Where(key+" = ?", value).Where(inKey+" IN (?)", inList).Find(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Where(key+" = ?", value).Where(inKey+" IN (?)", inList).Find(m).Error)
 }
 
 func WhereIn(tag string, m interface{}, inKey string, inList interface{}) *L.InformationConstruct {
-	return L.ParsePGError(ConnectionMap[tag].Where(inKey+" IN (?)", inList).Find(m).Error)
+	return L.ParseDBError(ConnectionMap[tag].Where(inKey+" IN (?)", inList).Find(m).Error)
 }
 
 var ConnectionMap = make(map[string]*gorm.DB)
@@ -132,9 +132,7 @@ func Ping(tag string) error {
 func Connect(dialect string, connectionString string, tag string) *logger.InformationConstruct {
 	Connection, err := gorm.Open(dialect, connectionString)
 	if err != nil {
-		xErr := logger.DatabaseConnectionErrror(err)
-		xErr.Log()
-		return xErr
+		return logger.DatabaseConnectionErrror(err)
 	}
 	ConnectionMap[tag] = Connection
 	return nil
